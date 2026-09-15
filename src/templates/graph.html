@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{VAULT_NAME}} — Wiki graph</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #1a1b26; color: #c0caf5; height: 100vh; overflow: hidden; }
+    #controls { position: fixed; top: 0; left: 0; right: 0; z-index: 10; background: #1a1b26; border-bottom: 1px solid #3b4261; padding: 12px 20px; display: flex; align-items: center; gap: 16px; }
+    #controls h1 { font-size: 16px; font-weight: 600; color: #7aa2f7; white-space: nowrap; }
+    #search { background: #24283b; border: 1px solid #3b4261; color: #c0caf5; padding: 6px 12px; border-radius: 6px; font-size: 14px; width: 280px; }
+    #search::placeholder { color: #565f89; }
+    #search:focus { outline: none; border-color: #7aa2f7; }
+    #info { font-size: 13px; color: #565f89; margin-left: auto; }
+    #legend { display: flex; gap: 8px; flex-wrap: wrap; }
+    .legend-item { font-size: 11px; padding: 2px 8px; border-radius: 10px; cursor: default; color: #1a1b26; }
+    #graph { width: 100%; height: 100%; padding-top: 52px; }
+    #tooltip { position: fixed; background: #24283b; border: 1px solid #3b4261; padding: 10px 14px; border-radius: 8px; font-size: 13px; pointer-events: none; display: none; z-index: 20; max-width: 300px; }
+    #tooltip .name { font-weight: 600; color: #7aa2f7; margin-bottom: 4px; }
+    #tooltip .detail { color: #9aa5ce; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <h1>{{VAULT_NAME}}</h1>
+    <input id="search" type="search" placeholder="Filter notes…">
+    <div id="legend"></div>
+    <div id="info"></div>
+  </div>
+  <div id="graph"></div>
+  <div id="tooltip"><div class="name"></div><div class="detail"></div></div>
+  <script>
+    const graphNodes = {{GRAPH_NODES}};
+    const graphEdges = {{GRAPH_EDGES}};
+    const clusterColors = {{CLUSTER_COLORS}};
+    const clusterLabels = {{CLUSTER_LABELS}};
+
+    const canvas = document.createElement("canvas");
+    const container = document.getElementById("graph");
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    container.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+
+    const nodes = graphNodes.map(n => ({
+      ...n,
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height + 52,
+      vx: 0, vy: 0, _dim: false
+    }));
+    const nodeMap = {};
+    nodes.forEach(n => { nodeMap[n.id] = n; });
+    const edges = graphEdges.filter(e => nodeMap[e.from] && nodeMap[e.to]);
+
+    const legend = document.getElementById("legend");
+    const seen = [...new Set(nodes.map(n => n.group))].sort((a, b) => a - b);
+    seen.forEach(c => {
+      const item = document.createElement("span");
+      item.className = "legend-item";
+      item.style.background = clusterColors[c] || "#565f89";
+      item.textContent = clusterLabels[c] || ("Cluster " + c);
+      legend.appendChild(item);
+    });
+    document.getElementById("info").textContent = nodes.length + " notes, " + edges.length + " links";
+
+    function simulate() {
+      const repulsion = 800, attraction = 0.005, damping = 0.9;
+      const centerX = canvas.width / 2, centerY = canvas.height / 2 + 26;
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[j].x - nodes[i].x, dy = nodes[j].y - nodes[i].y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const force = repulsion / (dist * dist);
+          const fx = (dx / dist) * force, fy = (dy / dist) * force;
+          nodes[i].vx -= fx; nodes[i].vy -= fy;
+          nodes[j].vx += fx; nodes[j].vy += fy;
+        }
+      }
+      edges.forEach(e => {
+        const a = nodeMap[e.from], b = nodeMap[e.to];
+        if (!a || !b) return;
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = dist * attraction;
+        a.vx += (dx / dist) * force; a.vy += (dy / dist) * force;
+        b.vx -= (dx / dist) * force; b.vy -= (dy / dist) * force;
+      });
+      nodes.forEach(n => {
+        n.vx += (centerX - n.x) * 0.001;
+        n.vy += (centerY - n.y) * 0.001;
+        n.vx *= damping; n.vy *= damping;
+        n.x = Math.max(20, Math.min(canvas.width - 20, n.x + n.vx));
+        n.y = Math.max(72, Math.min(canvas.height - 20, n.y + n.vy));
+      });
+    }
+
+    let hovered = null;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      edges.forEach(e => {
+        const a = nodeMap[e.from], b = nodeMap[e.to];
+        if (!a || !b) return;
+        const hot = hovered && (hovered.id === e.from || hovered.id === e.to);
+        ctx.strokeStyle = hot ? "#7aa2f7" : "#3b4261";
+        ctx.lineWidth = hot ? 1.5 : 0.5;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      });
+      nodes.forEach(n => {
+        if (n._dim) return;
+        const radius = 3 + (n.size || 0) * 8;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = hovered === n ? "#ffffff" : (clusterColors[n.group] || "#565f89");
+        ctx.fill();
+        if (n.size > 0.5 || hovered === n) {
+          ctx.font = (hovered === n ? "bold 13px" : "11px") + " -apple-system, sans-serif";
+          ctx.fillStyle = "#c0caf5";
+          ctx.textAlign = "center";
+          ctx.fillText(n.label, n.x, n.y - radius - 4);
+        }
+      });
+    }
+
+    const tooltip = document.getElementById("tooltip");
+    canvas.addEventListener("mousemove", e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+      hovered = null;
+      for (const n of nodes) {
+        if (n._dim) continue;
+        const r = 3 + (n.size || 0) * 8 + 4;
+        if ((mx - n.x) ** 2 + (my - n.y) ** 2 < r * r) { hovered = n; break; }
+      }
+      if (hovered) {
+        tooltip.style.display = "block";
+        tooltip.style.left = (e.clientX + 12) + "px";
+        tooltip.style.top = (e.clientY + 12) + "px";
+        tooltip.querySelector(".name").textContent = hovered.label;
+        tooltip.querySelector(".detail").innerHTML =
+          "Community: " + (clusterLabels[hovered.group] || hovered.group) +
+          "<br>Importance: " + ((hovered.size * 100).toFixed(0)) + "%" +
+          "<br>Connections: " + (hovered.degree || 0);
+        canvas.style.cursor = "pointer";
+      } else {
+        tooltip.style.display = "none";
+        canvas.style.cursor = "default";
+      }
+    });
+
+    document.getElementById("search").addEventListener("input", ev => {
+      const q = ev.target.value.toLowerCase();
+      nodes.forEach(n => { n._dim = q ? !n.label.toLowerCase().includes(q) : false; });
+    });
+
+    let frame = 0;
+    function loop() {
+      if (frame < 300) simulate();
+      draw();
+      frame++;
+      requestAnimationFrame(loop);
+    }
+    loop();
+    window.addEventListener("resize", () => {
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    });
+  </script>
+</body>
+</html>
