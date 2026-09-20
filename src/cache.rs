@@ -49,7 +49,10 @@ impl VaultCache {
             }
         }
 
-        eprintln!("Curator: indexed {} markdown files", search_files.len());
+        eprintln!(
+            "rabun-curator: indexed {} markdown files",
+            search_files.len()
+        );
         VaultCache {
             search_index: SearchIndex::build(&search_files),
             outgoing,

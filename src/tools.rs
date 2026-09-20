@@ -127,7 +127,7 @@ impl CuratorServer {
     async fn write(&self, params: Parameters<WriteParams>) -> Result<String, McpError> {
         if vault::is_under_raw(&params.0.path) {
             return Ok(
-                "Error: raw/ is immutable. Curator never writes source files. Put LLM-owned pages under wiki/."
+                "Error: raw/ is immutable. rabun-curator never writes source files. Put LLM-owned pages under wiki/."
                     .into(),
             );
         }
@@ -463,7 +463,7 @@ impl CuratorServer {
 impl ServerHandler for CuratorServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo::new(ServerCapabilities::builder().enable_tools().build()).with_instructions(
-            "Curator maintains a Karpathy LLM wiki. raw/ is immutable. Write only wiki pages, index.md, and log.md. Prefer search then read. After ingest, update index.md, append log.md, and run lint.",
+            "rabun-curator maintains a Karpathy LLM wiki. raw/ is immutable. Write only wiki pages, index.md, and log.md. Prefer search then read. After ingest, update index.md, append log.md, and run lint.",
         )
     }
 }

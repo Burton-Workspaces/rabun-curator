@@ -218,23 +218,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 
 [[package]]
-name = "curator"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "clap",
- "dirs",
- "ignore",
- "regex",
- "rmcp",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "toml_edit",
-]
-
-[[package]]
 name = "darling"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -677,6 +660,23 @@ name = "r-efi"
 version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
+
+[[package]]
+name = "rabun-curator"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "clap",
+ "dirs",
+ "ignore",
+ "regex",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "toml_edit",
+]
 
 [[package]]
 name = "redox_syscall"

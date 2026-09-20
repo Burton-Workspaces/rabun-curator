@@ -1,15 +1,17 @@
 [package]
-name = "curator"
+name = "rabun-curator"
 version = "0.1.0"
 edition = "2021"
 description = "Karpathy LLM Wiki pattern as a local MCP server"
 license = "MIT"
 readme = "README.md"
-keywords = ["mcp", "wiki", "obsidian", "markdown", "knowledge-graph"]
+repository = "https://github.com/Burton-Workspaces/rabun-curator"
+homepage = "https://github.com/Burton-Workspaces/rabun-curator"
+keywords = ["mcp", "wiki", "obsidian", "markdown", "knowledge-graph", "rabun"]
 categories = ["command-line-utilities", "text-processing"]
 
 [[bin]]
-name = "curator"
+name = "rabun-curator"
 path = "src/main.rs"
 
 [dependencies]

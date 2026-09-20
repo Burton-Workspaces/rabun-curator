@@ -1,10 +1,12 @@
-# Curator
+# Rabun Curator
 
 Give an LLM a librarian for a **Karpathy LLM Wiki**: immutable raw sources, an LLM-owned markdown wiki, and a schema that keeps ingest / query / lint disciplined.
 
-Curator is a **local MCP server** written in Rust. It searches the vault, auto-`[[wikilinks]]` on write, refuses mutations under `raw/`, walks the knowledge graph, detects communities, and writes a D3-style graph visualization. Claude Code, Grok, and Cursor all get the same `/curator` skill.
+`rabun-curator` is a **local MCP server** written in Rust. It searches the vault, auto-`[[wikilinks]]` on write, refuses mutations under `raw/`, walks the knowledge graph, detects communities, and writes a D3-style graph visualization. Claude Code, Grok, and Cursor all get the same `/rabun-curator` skill.
 
-Inspired by [Andrej Karpathy's LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) and the Rust architecture of [librarian-mcp](https://github.com/ngmeyer/librarian-mcp) (MIT). Curator is an original implementation, not a fork.
+The crate, PATH binary, MCP server key, and skill are all `rabun-curator`. Sibling Rabun CLIs use the same `rabun-<application>` form so they do not collide with unrelated tools on PATH.
+
+Inspired by [Andrej Karpathy's LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) and the Rust architecture of [librarian-mcp](https://github.com/ngmeyer/librarian-mcp) (MIT). rabun-curator is an original implementation, not a fork.
 
 Your vault never leaves the machine. The server speaks MCP over stdio. No network, no telemetry.
 
@@ -19,31 +21,31 @@ RAG rediscovers knowledge from raw chunks on every question. A wiki **compiles**
 cargo install --path .
 
 # Create a vault (raw/, wiki/, index.md, log.md, AGENTS.md)
-curator init ~/my-wiki
+rabun-curator init ~/my-wiki
 
 # Point Claude, Grok, and Cursor at it (skills + MCP)
-curator --setup ~/my-wiki
+rabun-curator --setup ~/my-wiki
 ```
 
-Restart the client, then try `/curator status` or `/curator ingest`.
+Restart the client, then try `/rabun-curator status` or `/rabun-curator ingest`.
 
 Try the bundled example:
 
 ```bash
-curator --setup examples/minimal-wiki
+rabun-curator --setup examples/minimal-wiki
 ```
 
 ## CLI
 
 | Command | What it does |
 |---------|----------------|
-| `curator /path/to/vault` | Start the MCP server on stdio |
-| `curator --setup /path/to/vault` | Write MCP config + `/curator` skill for Claude, Grok, and Cursor |
-| `curator init /path/to/vault` | Scaffold the three-layer wiki |
+| `rabun-curator /path/to/vault` | Start the MCP server on stdio |
+| `rabun-curator --setup /path/to/vault` | Write MCP config + `/rabun-curator` skill for Claude, Grok, and Cursor |
+| `rabun-curator init /path/to/vault` | Scaffold the three-layer wiki |
 
-Environment: `CURATOR_VAULT` or colon-separated `CURATOR_VAULTS`.
+Environment: `RABUN_CURATOR_VAULT` or colon-separated `RABUN_CURATOR_VAULTS`.
 
-Ignore extra paths with a gitignore-style `.curatorignore`. Extra auto-link stopwords: `.curatorstoplist`.
+Ignore extra paths with a gitignore-style `.rabun-curatorignore`. Extra auto-link stopwords: `.rabun-curatorstoplist`.
 
 ## MCP tools
 
@@ -58,22 +60,22 @@ Ignore extra paths with a gitignore-style `.curatorignore`. Extra auto-link stop
 | `visualize` | Interactive HTML graph (`GRAPH_VIZ.html`) |
 | `report` | God nodes, communities, bridges (`GRAPH_REPORT.md`) |
 
-Grok names tools `curator__search`, `curator__read`, and so on.
+Grok names tools `rabun-curator__search`, `rabun-curator__read`, and so on.
 
 ## Skill commands
 
-`--setup` installs [`skills/curator/SKILL.md`](skills/curator/SKILL.md) to:
+`--setup` installs [`skills/rabun-curator/SKILL.md`](skills/rabun-curator/SKILL.md) to:
 
-- `~/.claude/skills/curator/`
-- `~/.grok/skills/curator/`
-- `~/.cursor/skills/curator/`
+- `~/.claude/skills/rabun-curator/`
+- `~/.grok/skills/rabun-curator/`
+- `~/.cursor/skills/rabun-curator/`
 
 | Command | What it does |
 |---------|----------------|
-| `/curator ingest [path]` | Compile a `raw/` source into wiki pages, index, and log |
-| `/curator query <question>` | Answer from the wiki; file good answers back |
-| `/curator lint` | Structural lint plus a semantic health pass |
-| `/curator search` / `connect` / `graph` / `analyze` / `status` | Search, wikilinks, graph, viz, overview |
+| `/rabun-curator ingest [path]` | Compile a `raw/` source into wiki pages, index, and log |
+| `/rabun-curator query <question>` | Answer from the wiki; file good answers back |
+| `/rabun-curator lint` | Structural lint plus a semantic health pass |
+| `/rabun-curator search` / `connect` / `graph` / `analyze` / `status` | Search, wikilinks, graph, viz, overview |
 
 ## Vault layout
 

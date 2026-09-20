@@ -32,7 +32,7 @@ impl CuratorServer {
             .map(|s| s.to_string())
             .collect();
         for root in roots {
-            if let Ok(contents) = std::fs::read_to_string(root.join(".curatorstoplist")) {
+            if let Ok(contents) = std::fs::read_to_string(root.join(".rabun-curatorstoplist")) {
                 for line in contents.lines() {
                     let term = line.trim();
                     if !term.is_empty() && !term.starts_with('#') {

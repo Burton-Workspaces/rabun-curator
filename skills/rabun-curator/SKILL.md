@@ -1,16 +1,16 @@
 ---
-name: curator
-description: Maintain a Karpathy LLM wiki with the Curator MCP server. Ingest immutable raw sources into an LLM-owned wiki, query with citations, lint for drift, and explore the knowledge graph. Use when the user mentions curator, LLM wiki, ingest, vault lint, or wiki query.
+name: rabun-curator
+description: Maintain a Karpathy LLM wiki with the rabun-curator MCP server. Ingest immutable raw sources into an LLM-owned wiki, query with citations, lint for drift, and explore the knowledge graph. Use when the user mentions rabun-curator, curator, LLM wiki, ingest, vault lint, or wiki query.
 argument-hint: "<command> [args]"
 ---
 
-# /curator
+# /rabun-curator
 
-Orchestrate Karpathy LLM Wiki workflows with Curator MCP tools.
+Orchestrate Karpathy LLM Wiki workflows with rabun-curator MCP tools.
 
 ## Prerequisites
 
-The Curator MCP server must be configured. Verify with `stats`. If it fails, tell the user to run `curator --setup /path/to/vault` and restart the client.
+The rabun-curator MCP server must be configured. Verify with `stats`. If it fails, tell the user to run `rabun-curator --setup /path/to/vault` and restart the client.
 
 **Vault layers**
 
@@ -23,21 +23,21 @@ The Curator MCP server must be configured. Verify with `stats`. If it fails, tel
 ## Commands
 
 ```
-/curator ingest [path]     Process a raw/ source into the wiki
-/curator query <question>  Answer from the wiki; offer to file the answer
-/curator lint              Structural + semantic health check
-/curator search <query>    Deep search with synthesis
-/curator connect [path]    Find and apply missing wikilinks
-/curator graph [note]      Neighborhood or vault-wide structure
-/curator analyze           Communities, visualization, graph report
-/curator status            Vault health overview
+/rabun-curator ingest [path]     Process a raw/ source into the wiki
+/rabun-curator query <question>  Answer from the wiki; offer to file the answer
+/rabun-curator lint              Structural + semantic health check
+/rabun-curator search <query>    Deep search with synthesis
+/rabun-curator connect [path]    Find and apply missing wikilinks
+/rabun-curator graph [note]      Neighborhood or vault-wide structure
+/rabun-curator analyze           Communities, visualization, graph report
+/rabun-curator status            Vault health overview
 ```
 
 If no command is given, show this usage summary.
 
 ## Clients
 
-Tool names are unprefixed (`search`, `read`, `write`, …). Grok namespaces them as `curator__search`. Claude Code, Claude Desktop, and Cursor use `search`. Same workflows either way.
+Tool names are unprefixed (`search`, `read`, `write`, …). Grok namespaces them as `rabun-curator__search`. Claude Code, Claude Desktop, and Cursor use `search`. Same workflows either way.
 
 ---
 

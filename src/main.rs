@@ -21,7 +21,7 @@ use server::CuratorServer;
 
 /// Karpathy LLM Wiki — local MCP server for a compounding markdown knowledge base.
 #[derive(Parser)]
-#[command(name = "curator", version, about)]
+#[command(name = env!("CARGO_PKG_NAME"), version, about)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -48,10 +48,10 @@ fn resolve_vaults(cli: &Cli) -> Vec<PathBuf> {
     if !cli.vaults.is_empty() {
         return cli.vaults.clone();
     }
-    if let Ok(vaults) = std::env::var("CURATOR_VAULTS") {
+    if let Ok(vaults) = std::env::var("RABUN_CURATOR_VAULTS") {
         return vaults.split(':').map(PathBuf::from).collect();
     }
-    if let Ok(vault) = std::env::var("CURATOR_VAULT") {
+    if let Ok(vault) = std::env::var("RABUN_CURATOR_VAULT") {
         return vec![PathBuf::from(vault)];
     }
     Vec::new()
@@ -71,7 +71,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if cli.setup {
         if library_paths.is_empty() {
             eprintln!("Error: --setup requires at least one vault path.");
-            eprintln!("Usage: curator --setup /path/to/vault");
+            eprintln!("Usage: rabun-curator --setup /path/to/vault");
             std::process::exit(1);
         }
         setup::run_setup(&library_paths)?;
@@ -80,9 +80,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if library_paths.is_empty() {
         eprintln!("Error: no vault specified.");
-        eprintln!("Usage: curator /path/to/vault");
-        eprintln!("       curator --setup /path/to/vault");
-        eprintln!("       curator init /path/to/vault");
+        eprintln!("Usage: rabun-curator /path/to/vault");
+        eprintln!("       rabun-curator --setup /path/to/vault");
+        eprintln!("       rabun-curator init /path/to/vault");
         std::process::exit(1);
     }
 
@@ -107,10 +107,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .map(|p| p.to_string_lossy().to_string())
         .collect();
     if display.len() == 1 {
-        eprintln!("Curator MCP starting — vault: {}", display[0]);
+        eprintln!("rabun-curator MCP starting — vault: {}", display[0]);
     } else {
         eprintln!(
-            "Curator MCP starting — {} vaults: {}",
+            "rabun-curator MCP starting — {} vaults: {}",
             display.len(),
             display.join(", ")
         );

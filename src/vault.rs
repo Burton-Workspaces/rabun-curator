@@ -1,6 +1,6 @@
 use std::path::{Component, Path, PathBuf};
 
-/// Directories skipped when no `.curatorignore` is present.
+/// Directories skipped when no `.rabun-curatorignore` is present.
 pub const DEFAULT_IGNORE_NAMES: &[&str] = &[".obsidian", ".trash", ".git", "node_modules"];
 
 /// True when a vault-relative path is under the immutable `raw/` tree.
@@ -47,14 +47,14 @@ pub fn sandbox_join(root: &Path, rel: &str) -> Result<PathBuf, String> {
     Ok(root.join(normalized))
 }
 
-/// Walk markdown files under each vault root, honoring `.curatorignore` (gitignore syntax).
+/// Walk markdown files under each vault root, honoring `.rabun-curatorignore` (gitignore syntax).
 pub fn all_md_files(roots: &[PathBuf]) -> Vec<PathBuf> {
     let mut files = Vec::new();
     for root in roots {
         let mut builder = ignore::WalkBuilder::new(root);
         builder.hidden(true);
 
-        let ignore_file = root.join(".curatorignore");
+        let ignore_file = root.join(".rabun-curatorignore");
         if ignore_file.exists() {
             builder.add_ignore(&ignore_file);
         } else {

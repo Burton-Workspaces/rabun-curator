@@ -32,4 +32,4 @@ This vault is a [Karpathy LLM Wiki](https://gist.github.com/karpathy/442a6bf5559
 
 ## Tools
 
-Prefer Curator MCP tools (`search`, `read`, `write`, `lint`, `stats`, graph tools) when available. `write` refuses `raw/`. After writes, the search index and graph refresh automatically.
+Prefer rabun-curator MCP tools (`search`, `read`, `write`, `lint`, `stats`, graph tools) when available. `write` refuses `raw/`. After writes, the search index and graph refresh automatically.

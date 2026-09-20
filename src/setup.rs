@@ -1,11 +1,12 @@
 use std::path::{Path, PathBuf};
 
-const SKILL_CONTENT: &str = include_str!("../skills/curator/SKILL.md");
+const APP_NAME: &str = env!("CARGO_PKG_NAME");
+const SKILL_CONTENT: &str = include_str!("../skills/rabun-curator/SKILL.md");
 
 pub fn find_binary_path() -> String {
     std::env::current_exe()
         .map(|p| p.to_string_lossy().to_string())
-        .unwrap_or_else(|_| "curator".to_string())
+        .unwrap_or_else(|_| APP_NAME.to_string())
 }
 
 fn claude_desktop_config_path() -> Option<PathBuf> {
@@ -74,7 +75,7 @@ fn upsert_json_mcp(
     servers
         .as_object_mut()
         .unwrap()
-        .insert("curator".to_string(), mcp_server_json(binary, vault_args));
+        .insert(APP_NAME.to_string(), mcp_server_json(binary, vault_args));
     std::fs::write(config_path, serde_json::to_string_pretty(&config)?)?;
     Ok(true)
 }
@@ -104,8 +105,8 @@ fn upsert_grok_toml(
     for arg in vault_args {
         args.push(arg.as_str());
     }
-    doc["mcp_servers"]["curator"]["command"] = toml_edit::value(binary);
-    doc["mcp_servers"]["curator"]["args"] = toml_edit::Item::Value(toml_edit::Value::Array(args));
+    doc["mcp_servers"][APP_NAME]["command"] = toml_edit::value(binary);
+    doc["mcp_servers"][APP_NAME]["args"] = toml_edit::Item::Value(toml_edit::Value::Array(args));
     std::fs::write(config_path, doc.to_string())?;
     Ok(true)
 }
@@ -156,9 +157,9 @@ pub fn run_setup(vault_paths: &[PathBuf]) -> Result<(), Box<dyn std::error::Erro
 
     if let Some(home) = dirs::home_dir() {
         for (label, dir) in [
-            ("Claude skill", home.join(".claude/skills/curator")),
-            ("Grok skill", home.join(".grok/skills/curator")),
-            ("Cursor skill", home.join(".cursor/skills/curator")),
+            ("Claude skill", home.join(".claude/skills").join(APP_NAME)),
+            ("Grok skill", home.join(".grok/skills").join(APP_NAME)),
+            ("Cursor skill", home.join(".cursor/skills").join(APP_NAME)),
         ] {
             match install_skill(dir.clone()) {
                 Ok(_) => configured.push(format!("{label} ({}/SKILL.md)", dir.display())),
@@ -173,18 +174,17 @@ pub fn run_setup(vault_paths: &[PathBuf]) -> Result<(), Box<dyn std::error::Erro
         eprintln!("  command: {binary}");
         eprintln!("  args: {vault_args:?}");
         eprintln!("\nJSON clients:");
-        eprintln!(
-            "{}",
-            serde_json::to_string_pretty(&serde_json::json!({
-                "mcpServers": { "curator": mcp_server_json(&binary, &vault_args) }
-            }))?
-        );
+        let mut servers = serde_json::Map::new();
+        servers.insert(APP_NAME.to_string(), mcp_server_json(&binary, &vault_args));
+        let mut example = serde_json::Map::new();
+        example.insert("mcpServers".to_string(), serde_json::Value::Object(servers));
+        eprintln!("{}", serde_json::to_string_pretty(&example)?);
         eprintln!("\nGrok (~/.grok/config.toml):");
-        eprintln!("[mcp_servers.curator]");
+        eprintln!("[mcp_servers.{APP_NAME}]");
         eprintln!("command = \"{binary}\"");
         eprintln!("args = {vault_args:?}");
     } else {
-        println!("Curator configured for:");
+        println!("{APP_NAME} configured for:");
         for target in &configured {
             println!("  {target}");
         }
@@ -196,7 +196,9 @@ pub fn run_setup(vault_paths: &[PathBuf]) -> Result<(), Box<dyn std::error::Erro
         );
         println!();
         println!("Restart Claude / Grok / Cursor to connect the wiki.");
-        println!("Skill command: /curator (ingest, query, lint, search, graph, analyze, status)");
+        println!(
+            "Skill command: /{APP_NAME} (ingest, query, lint, search, graph, analyze, status)"
+        );
     }
 
     Ok(())

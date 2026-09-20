@@ -24,14 +24,14 @@ pub fn run(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
     write_if_missing(path.join("index.md"), INDEX)?;
     write_if_missing(path.join("log.md"), LOG)?;
 
-    println!("Initialized curator wiki at {}", path.display());
+    println!("Initialized rabun-curator wiki at {}", path.display());
     println!("  raw/     immutable sources");
     println!("  wiki/    LLM-owned pages");
     println!("  index.md catalog");
     println!("  log.md   append-only operations log");
     println!("  AGENTS.md schema");
     println!();
-    println!("Next: drop a source into raw/ and run /curator ingest");
+    println!("Next: drop a source into raw/ and run /rabun-curator ingest");
     Ok(())
 }
 
