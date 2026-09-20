@@ -1,0 +1,104 @@
+# Builds versioned binaries and attaches them to a GitHub Release.
+# Triggered by:
+#   - Create release (workflow_call)
+#   - release.yml after release-plz tags a version
+#   - pushing a vX.Y.Z tag (manual releases; skipped when Create release already tagged the commit)
+#   - workflow_dispatch (retries)
+name: Release binaries
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Git tag to build (latest stable SemVer 2.0.0, for example vX.Y.Z)
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Git tag to build (latest stable SemVer 2.0.0, for example vX.Y.Z)
+        required: true
+        type: string
+  push:
+    tags:
+      - "v[0-9]+.*"
+
+permissions:
+  contents: read
+
+jobs:
+  github-release:
+    name: Ensure GitHub Release
+    # Create release already calls this workflow; skip the duplicate tag-push run.
+    if: github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Release ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - id: meta
+        env:
+          TAG_INPUT: ${{ inputs.tag }}
+        run: echo "tag=${TAG_INPUT:-${GITHUB_REF_NAME}}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.meta.outputs.tag }}
+          fetch-tags: true
+      - name: Verify tag matches crate version
+        env:
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          expected="${TAG#v}"
+          actual=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)
+          if [ "$expected" != "$actual" ]; then
+            echo "Tag $TAG does not match crate version $actual"
+            exit 1
+          fi
+      - name: Ensure GitHub Release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists"
+          else
+            gh release create "$TAG" --title "$TAG" --generate-notes
+          fi
+
+  upload-assets:
+    name: Upload ${{ matrix.target }}
+    needs: github-release
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.github-release.outputs.tag }}
+          fetch-tags: true
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: rabun-curator
+          target: ${{ matrix.target }}
+          ref: refs/tags/${{ needs.github-release.outputs.tag }}
+          archive: rabun-curator-$tag-$target
+          checksum: sha256
+          locked: true
+          include: LICENSE,README.md
+          tar: unix
+          zip: windows

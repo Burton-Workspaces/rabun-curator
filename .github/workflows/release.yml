@@ -1,0 +1,79 @@
+# Semantic Versioning 2.0.0 via release-plz (conventional commits).
+# Merge the release PR to tag vX.Y.Z, create the GitHub Release, and build binaries.
+name: Release
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  release-plz-release:
+    name: Release-plz release
+    if: |
+      github.repository == 'Burton-Workspaces/rabun-curator' &&
+      !startsWith(github.event.head_commit.message, 'Release ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    outputs:
+      releases_created: ${{ steps.release-plz.outputs.releases_created }}
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run release-plz
+        id: release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Export release tag
+        id: tag
+        if: steps.release-plz.outputs.releases_created == 'true'
+        env:
+          RELEASES: ${{ steps.release-plz.outputs.releases }}
+        run: echo "tag=$(echo "$RELEASES" | jq -r '.[0].tag // empty')" >> "$GITHUB_OUTPUT"
+
+  release-plz-pr:
+    name: Release-plz PR
+    if: |
+      github.repository == 'Burton-Workspaces/rabun-curator' &&
+      !startsWith(github.event.head_commit.message, 'Release ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: release-plz-pr-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  upload-assets:
+    name: Upload release binaries
+    needs: release-plz-release
+    if: needs.release-plz-release.outputs.releases_created == 'true' && needs.release-plz-release.outputs.tag != ''
+    uses: ./.github/workflows/release-binaries.yml
+    with:
+      tag: ${{ needs.release-plz-release.outputs.tag }}
+    secrets: inherit
+    permissions:
+      contents: write

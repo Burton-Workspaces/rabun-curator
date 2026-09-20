@@ -462,9 +462,14 @@ impl CuratorServer {
 #[tool_handler]
 impl ServerHandler for CuratorServer {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build()).with_instructions(
-            "rabun-curator maintains a Karpathy LLM wiki. raw/ is immutable. Write only wiki pages, index.md, and log.md. Prefer search then read. After ingest, update index.md, append log.md, and run lint.",
-        )
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::new(
+                env!("CARGO_PKG_NAME"),
+                crate::version::crate_version().to_string(),
+            ))
+            .with_instructions(
+                "rabun-curator maintains a Karpathy LLM wiki. raw/ is immutable. Write only wiki pages, index.md, and log.md. Prefer search then read. After ingest, update index.md, append log.md, and run lint.",
+            )
     }
 }
 
@@ -482,10 +487,14 @@ mod tests {
             cache: Arc::new(Mutex::new(VaultCache::default())),
             tool_router: CuratorServer::new_tool_router(),
         };
+        let info = server.get_info();
         assert!(
-            server.get_info().capabilities.tools.is_some(),
+            info.capabilities.tools.is_some(),
             "server must advertise the tools capability"
         );
+        assert_eq!(info.server_info.name, env!("CARGO_PKG_NAME"));
+        assert_eq!(info.server_info.version, env!("CARGO_PKG_VERSION"));
+        crate::version::parse(info.server_info.version.as_ref()).unwrap();
     }
 
     #[test]

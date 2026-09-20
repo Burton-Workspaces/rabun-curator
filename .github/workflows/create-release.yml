@@ -1,0 +1,77 @@
+# Cut a SemVer 2.0.0 release from master: bump Cargo.toml, roll CHANGELOG.md,
+# commit, tag, and upload Linux binaries.
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: SemVer component to bump on master
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+
+permissions:
+  contents: write
+
+concurrency:
+  group: create-release
+  cancel-in-progress: false
+
+jobs:
+  cut:
+    name: Bump version and tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.cut.outputs.tag }}
+      version: ${{ steps.cut.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+      - name: Require master
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_REF}" != "refs/heads/master" ]; then
+            echo "Create release only from master (this run is ${GITHUB_REF})"
+            exit 1
+          fi
+      - uses: dtolnay/rust-toolchain@stable
+        if: hashFiles('Cargo.toml') != ''
+      - name: Cut release
+        id: cut
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: python3 .github/scripts/cut-release.py
+      - name: Commit, tag, and push
+        env:
+          VERSION: ${{ steps.cut.outputs.version }}
+          TAG: ${{ steps.cut.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "tag ${TAG} already exists"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          git commit -m "Release ${VERSION}."
+          git tag -a "${TAG}" -m "Release ${VERSION}."
+          git push origin HEAD
+          git push origin "${TAG}"
+
+  binaries:
+    name: Release binaries
+    needs: cut
+    uses: ./.github/workflows/release-binaries.yml
+    with:
+      tag: ${{ needs.cut.outputs.tag }}
+    secrets: inherit
+    permissions:
+      contents: write

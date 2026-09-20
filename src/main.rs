@@ -8,6 +8,7 @@ mod server;
 mod setup;
 mod tools;
 mod vault;
+mod version;
 mod viz;
 mod wiki;
 
@@ -106,11 +107,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .iter()
         .map(|p| p.to_string_lossy().to_string())
         .collect();
+    let version = version::crate_version();
     if display.len() == 1 {
-        eprintln!("rabun-curator MCP starting — vault: {}", display[0]);
+        eprintln!(
+            "rabun-curator {version} MCP starting — vault: {}",
+            display[0]
+        );
     } else {
         eprintln!(
-            "rabun-curator MCP starting — {} vaults: {}",
+            "rabun-curator {version} MCP starting — {} vaults: {}",
             display.len(),
             display.join(", ")
         );
@@ -120,4 +125,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let service = server.serve(transport).await?;
     service.waiting().await?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use clap::CommandFactory;
+
+    use super::Cli;
+
+    #[test]
+    fn clap_debug_assert() {
+        Cli::command().debug_assert();
+    }
+
+    #[test]
+    fn crate_version_is_semver_2() {
+        let parsed = crate::version::crate_version();
+        assert!(parsed.pre.is_empty());
+        assert_eq!(
+            parsed,
+            crate::version::parse(env!("CARGO_PKG_VERSION")).unwrap()
+        );
+        assert_eq!(
+            crate::version::crate_git_tag(),
+            format!("v{}", env!("CARGO_PKG_VERSION"))
+        );
+    }
 }
