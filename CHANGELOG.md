@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 
 ## [Unreleased]
 
+## [0.1.0](https://github.com/Burton-Workspaces/rabun-curator/releases/tag/v0.1.0) - 2026-09-20
+
+### Other
+
+- Add Semantic Versioning 2.0.0 and tagged GitHub Releases.
+- Rename the CLI, crate, and skill to rabun-curator.
+- Add Curator, a local MCP server for Karpathy LLM wikis.
+
 ### Added
 
 - Semantic Versioning 2.0.0 for the crate version, `rabun-curator --version`, and `vMAJOR.MINOR.PATCH` git tags
