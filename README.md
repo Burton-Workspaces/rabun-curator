@@ -6,7 +6,7 @@ Give an LLM a librarian for a **Karpathy LLM Wiki**: immutable raw sources, an L
 
 The crate, PATH binary, MCP server key, and skill are all `rabun-curator`. Sibling Rabun CLIs use the same `rabun-<application>` form so they do not collide with unrelated tools on PATH.
 
-Versions follow [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). `rabun-curator --version` reports the crate version baked in at build time. Git tags are `vMAJOR.MINOR.PATCH` and must match `Cargo.toml`. Sibling Rabun CLIs use the same SemVer 2.0.0 rule.
+Versions follow [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). `rabun-curator --version` reports the crate version baked in at build time. Git tags are `vMAJOR.MINOR.PATCH` and must match `Cargo.toml`. Sibling Rabun CLIs use the same SemVer 2.0.0 rule. Cut a production tag from GitHub Actions → **Create release**.
 
 Inspired by [Andrej Karpathy's LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) and the Rust architecture of [librarian-mcp](https://github.com/ngmeyer/librarian-mcp) (MIT). rabun-curator is an original implementation, not a fork.
 

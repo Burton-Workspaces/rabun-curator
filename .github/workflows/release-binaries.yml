@@ -1,7 +1,6 @@
 # Builds versioned binaries and attaches them to a GitHub Release.
 # Triggered by:
 #   - Create release (workflow_call)
-#   - release.yml after release-plz tags a version
 #   - pushing a vX.Y.Z tag (manual releases; skipped when Create release already tagged the commit)
 #   - workflow_dispatch (retries)
 name: Release binaries

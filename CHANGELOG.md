@@ -10,4 +10,8 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 ### Added
 
 - Semantic Versioning 2.0.0 for the crate version, `rabun-curator --version`, and `vMAJOR.MINOR.PATCH` git tags
-- Create release and release-plz workflows that tag SemVer 2.0.0 GitHub Releases with Linux binaries
+- Create release workflow that tags SemVer 2.0.0 GitHub Releases with Linux binaries
+
+### Changed
+
+- Drop the automatic release-plz PR on push to master. This repository does not allow GitHub Actions to create pull requests; cut versions with Actions → Create release.
