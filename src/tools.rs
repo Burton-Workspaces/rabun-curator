@@ -468,7 +468,7 @@ impl ServerHandler for CuratorServer {
                 crate::version::crate_version().to_string(),
             ))
             .with_instructions(
-                "rabun-curator maintains a Karpathy LLM wiki. raw/ is immutable. Write only wiki pages, index.md, and log.md. Prefer search then read. After ingest, update index.md, append log.md, and run lint.",
+                "rabun-curator maintains a Karpathy LLM wiki. raw/ is immutable (rabun-warehouse may write it). Write only wiki pages, index.md, and log.md. Prefer search then read. After ingest, update index.md, append log.md, and run lint.",
             )
     }
 }

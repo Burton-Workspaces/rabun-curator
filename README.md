@@ -2,7 +2,7 @@
 
 Give an LLM a librarian for a **Karpathy LLM Wiki**: immutable raw sources, an LLM-owned markdown wiki, and a schema that keeps ingest / query / lint disciplined.
 
-`rabun-curator` is a **local MCP server** written in Rust. It searches the vault, auto-`[[wikilinks]]` on write, refuses mutations under `raw/`, walks the knowledge graph, detects communities, and writes a D3-style graph visualization. Claude Code, Grok, and Cursor all get the same `/rabun-curator` skill.
+`rabun-curator` is a **local MCP server** written in Rust. It searches the vault, auto-`[[wikilinks]]` on write, refuses mutations under `raw/`, walks the knowledge graph, detects communities, and writes a D3-style graph visualization. Claude Code, Grok, and Cursor all get the same `/rabun-curator` skill. When the vault sits next to Burton, `rabun-warehouse` may populate `raw/` (YAML records and Markdown documents); curator must never write that layer.
 
 The crate, PATH binary, MCP server key, and skill are all `rabun-curator`. Sibling Rabun CLIs use the same `rabun-<application>` form so they do not collide with unrelated tools on PATH.
 

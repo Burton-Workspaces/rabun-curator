@@ -4,7 +4,7 @@ This vault is a [Karpathy LLM Wiki](https://gist.github.com/karpathy/442a6bf5559
 
 ## Layers
 
-- **`raw/`** — immutable sources. Read them. Never modify them.
+- **`raw/`** — immutable sources. Read them. Never modify them. `rabun-warehouse` may write this layer; curator never does.
 - **`wiki/`** — LLM-owned markdown: entity pages, concept pages, source summaries, comparisons, syntheses.
 - **`AGENTS.md`** — this schema. Co-evolve it with the human when conventions need to change.
 - **`index.md`** — catalog of wiki pages with a one-line summary each. Update on every ingest.

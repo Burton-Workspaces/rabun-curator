@@ -14,7 +14,7 @@ The rabun-curator MCP server must be configured. Verify with `stats`. If it fail
 
 **Vault layers**
 
-- `raw/` — immutable sources. Never write here.
+- `raw/` — immutable sources. Never write here. `rabun-warehouse` may populate this layer.
 - `wiki/` — LLM-owned pages (entities, concepts, source summaries, comparisons).
 - `index.md` — catalog. Update on every ingest.
 - `log.md` — append-only. Entry prefix: `## [YYYY-MM-DD] kind | Title`

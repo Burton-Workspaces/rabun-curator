@@ -15,3 +15,4 @@ and this project adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/
 ### Changed
 
 - Drop the automatic release-plz PR on push to master. This repository does not allow GitHub Actions to create pull requests; cut versions with Actions → Create release.
+- Document that `rabun-warehouse` may write the immutable `raw/` layer; curator never mutates it
